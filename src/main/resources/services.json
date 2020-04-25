@@ -1,0 +1,22 @@
+{
+  "names": {
+    "minecraft.net": "Minecraft Website",
+    "session.minecraft.net": "Minecraft Sessions",
+    "textures.minecraft.net": "Minecraft Textures",
+    "mojang.com": "Mojang Website",
+    "account.mojang.com": "Mojang Accounts",
+    "authserver.mojang.com": "Mojang Authentication Server",
+    "sessionserver.mojang.com": "Mojang Session Server",
+    "api.mojang.com": "Mojang API"
+  },
+  "services": [
+    "minecraft.net",
+    "session.minecraft.net",
+    "textures.minecraft.net",
+    "mojang.com",
+    "account.mojang.com",
+    "authserver.mojang.com",
+    "sessionserver.mojang.com",
+    "api.mojang.com"
+  ]
+}

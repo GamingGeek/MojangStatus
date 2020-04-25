@@ -1,0 +1,16 @@
+[
+{
+  "modid": "mojang_status",
+  "name": "Mojang Status",
+  "description": "Gives notifications about Mojang status",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://github.com/GamingGeek/MojangStatus",
+  "updateUrl": "",
+  "authorList": ["Geek"],
+  "credits": "Sk1er LLC for making Modcore, Elementa and Vigilance.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
