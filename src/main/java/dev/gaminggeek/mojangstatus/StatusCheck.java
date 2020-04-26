@@ -50,7 +50,6 @@ public class StatusCheck {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (config.noChanges) lastStatus = initStatus();
         if (config.debug) lastStatus = fakeStatus();
         JsonArray changes = getChanged(lastStatus, latestStatus);
         for (JsonElement service : changes) {
