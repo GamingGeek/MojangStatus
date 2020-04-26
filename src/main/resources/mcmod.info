@@ -2,7 +2,7 @@
 {
   "modid": "mojang_status",
   "name": "Mojang Status",
-  "description": "Gives notifications about Mojang status",
+  "description": "A simple yet customizable mod to show Mojang's status",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "https://github.com/GamingGeek/MojangStatus",

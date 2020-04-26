@@ -1,1 +1,1 @@
-Adds notifications for Mojang status
+A simple yet customizable mod to show Mojang's status

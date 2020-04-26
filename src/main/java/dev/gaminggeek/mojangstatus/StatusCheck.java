@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
 
 public class StatusCheck {
     public OkHttpClient client = new OkHttpClient();
@@ -51,8 +50,8 @@ public class StatusCheck {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        if (config.noChanges) lastStatus = initStatus();
         if (config.debug) lastStatus = fakeStatus();
-        else if (config.noChanges) lastStatus = initStatus();
         JsonArray changes = getChanged(lastStatus, latestStatus);
         for (JsonElement service : changes) {
             JsonObject change = service.getAsJsonObject();
@@ -104,7 +103,7 @@ public class StatusCheck {
         } else if (status.equalsIgnoreCase("yellow")) {
             notifications.pushNotification(
                     "Status Change",
-                    String.format("%s " + i + " some issues!", service)
+                    String.format("%s " + i + " having some issues!", service)
             );
         } else if (status.equalsIgnoreCase("red")) {
             notifications.pushNotification(
