@@ -1,5 +1,6 @@
 # MojangStatus
 A simple yet customizable mod to show Mojang's status (1.8.9)
+[Latest Version](https://github.com/GamingGeek/MojangStatus/releases/latest)
 
 ## Commands
 `/mojangstatus` - **Configure the mod**
