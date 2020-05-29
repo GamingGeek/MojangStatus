@@ -1,11 +1,13 @@
 # MojangStatus
 A simple yet customizable mod to show Mojang's status (1.8.9)
+[Latest Version](https://github.com/GamingGeek/MojangStatus/releases/latest)
 
 ## Commands
 `/mojangstatus` - **Configure the mod**
 
-`/checkstatus` - **Manually check Mojang status (will only show notifications if it has changed since last check)**
+`/checkstatus` - **Manually check Mojang status (will only show notifications if it has changed since last check and debug is not enabled)**
 
-## Note
-The `Debug` and `No Changes` options are kinda buggy and annoying. It's not recommended to use them.
-They just allow you to force notifications to show even if the status hasn't changed
+# Screenshots
+![Global Settings](https://i.inv.wtf/8fYJoQDF.png)
+![Services Settings](https://i.inv.wtf/e0vxTdzY.png)
+![Notifications](https://i.inv.wtf/nO96UNjw.png)
