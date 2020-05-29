@@ -21,10 +21,16 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    - name: Execute Gradle task
-      uses: OrangeLabs-moe/gradle-actions@v5.0-openjdk-8
+    - name: Setup Java JDK
+      uses: actions/setup-java@v1.3.0
       with:
-        args: './gradlew build'
+        # The Java version to make available on the path. Takes a whole or semver Java version, or 1.x syntax (e.g. 1.8 => Java 8.x)
+        java-version:  1.8
+        
+    - name: Build Mod
+      uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: build
  
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2
