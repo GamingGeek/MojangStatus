@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod(modid = MojangStatus.MODID, version = MojangStatus.VERSION)
 public class MojangStatus {
     public static final String MODID = "mojang_status";
-    public static final String VERSION = "1.1";
+    public static final String VERSION = "1.2";
     public static StatusCheck check = new StatusCheck();
     public static StatusConfig statusConfig;
 
@@ -39,20 +39,21 @@ public class MojangStatus {
         ClientCommandHandler.instance.registerCommand(new CommandMojangStatus());
         ClientCommandHandler.instance.registerCommand(new CommandCheckStatus());
 
-        lastStatus = check.initStatus();
+        lastStatus = check.fakeStatus();
+        check.checkStatus(lastStatus, false);
     }
 
     @EventHandler
     public void onLaunch(FMLLoadCompleteEvent event) {
         if (statusConfig.statusMessages && statusConfig.statusOnStartup && !statusConfig.statusOnMainMenu) {
-            check.checkStatus(lastStatus);
+            check.checkStatus(lastStatus, true);
         }
     }
 
     @SubscribeEvent
     public void onWorldLoad(Load event) {
         if (statusConfig.statusMessages && statusConfig.statusOnWorldLoad) {
-            check.checkStatus(lastStatus);
+            check.checkStatus(lastStatus, true);
         }
     }
 
@@ -60,11 +61,11 @@ public class MojangStatus {
     public void onGuiOpen(GuiOpenEvent event) {
         if (event.gui instanceof GuiMainMenu) {
             if (statusConfig.statusMessages && statusConfig.statusOnMainMenu) {
-                check.checkStatus(lastStatus);
+                check.checkStatus(lastStatus, true);
             }
         } else if (event.gui instanceof GuiIngameMenu) {
             if (statusConfig.statusMessages && statusConfig.statusOnPause) {
-                check.checkStatus(lastStatus);
+                check.checkStatus(lastStatus, true);
             }
         }
     }

@@ -19,8 +19,8 @@ public class StatusCheck {
     public OkHttpClient client = new OkHttpClient();
     public static final Notifications notifications = Notifications.INSTANCE;
     public JsonObject servicesConfig = getServicesConfig();
-    public JsonArray services = (JsonArray) servicesConfig.get("services");
-    public JsonObject names = (JsonObject) servicesConfig.get("names");
+    public JsonArray services = servicesConfig.getAsJsonArray("services");
+    public JsonObject names = servicesConfig.getAsJsonObject("names");
 
     public JsonArray getStatus() throws Exception {
         Request request = new Request.Builder()
@@ -42,7 +42,7 @@ public class StatusCheck {
         throw new Exception("Failed to retrieve status");
     }
 
-    public void checkStatus(JsonArray lastStatus) {
+    public void checkStatus(JsonArray lastStatus, Boolean notify) {
         StatusConfig config = MojangStatus.statusConfig;
         JsonArray latestStatus = new JsonArray();
         try {
@@ -50,41 +50,43 @@ public class StatusCheck {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (config.debug) lastStatus = fakeStatus();
-        JsonArray changes = getChanged(lastStatus, latestStatus);
-        for (JsonElement service : changes) {
-            JsonObject change = service.getAsJsonObject();
-            String s = "minecraft.net";
-            if (change.has(s) && config.minecraftWebsite) {
-                notify(s, change.get(s).getAsString());
-            }
-            s = "session.minecraft.net";
-            if (change.has(s) && config.minecraftSessions) {
-                notify(s, change.get(s).getAsString());
-            }
-            s = "textures.minecraft.net";
-            if (change.has(s) && config.minecraftTextures) {
-                notify(s, change.get(s).getAsString());
-            }
-            s = "mojang.com";
-            if (change.has(s) && config.mojangWebsite) {
-                notify(s, change.get(s).getAsString());
-            }
-            s = "account.mojang.com";
-            if (change.has(s) && config.mojangAccounts) {
-                notify(s, change.get(s).getAsString());
-            }
-            s = "authserver.mojang.com";
-            if (change.has(s) && config.mojangAuth) {
-                notify(s, change.get(s).getAsString());
-            }
-            s = "sessionserver.mojang.com";
-            if (change.has(s) && config.mojangSessions) {
-                notify(s, change.get(s).getAsString());
-            }
-            s = "api.mojang.com";
-            if (change.has(s) && config.mojangAPI) {
-                notify(s, change.get(s).getAsString());
+        if (notify) {
+            if (config.debug) lastStatus = fakeStatus();
+            JsonArray changes = getChanged(lastStatus, latestStatus);
+            for (JsonElement service : changes) {
+                JsonObject change = service.getAsJsonObject();
+                String s = "minecraft.net";
+                if (change.has(s) && config.minecraftWebsite) {
+                    notify(s, change.get(s).getAsString());
+                }
+                s = "session.minecraft.net";
+                if (change.has(s) && config.minecraftSessions) {
+                    notify(s, change.get(s).getAsString());
+                }
+                s = "textures.minecraft.net";
+                if (change.has(s) && config.minecraftTextures) {
+                    notify(s, change.get(s).getAsString());
+                }
+                s = "mojang.com";
+                if (change.has(s) && config.mojangWebsite) {
+                    notify(s, change.get(s).getAsString());
+                }
+                s = "account.mojang.com";
+                if (change.has(s) && config.mojangAccounts) {
+                    notify(s, change.get(s).getAsString());
+                }
+                s = "authserver.mojang.com";
+                if (change.has(s) && config.mojangAuth) {
+                    notify(s, change.get(s).getAsString());
+                }
+                s = "sessionserver.mojang.com";
+                if (change.has(s) && config.mojangSessions) {
+                    notify(s, change.get(s).getAsString());
+                }
+                s = "api.mojang.com";
+                if (change.has(s) && config.mojangAPI) {
+                    notify(s, change.get(s).getAsString());
+                }
             }
         }
         MojangStatus.lastStatus = latestStatus;
@@ -114,22 +116,13 @@ public class StatusCheck {
 
     public JsonArray getChanged(JsonArray before, JsonArray after) {
         JsonArray changed = new JsonArray();
+        if (before.size() == 0 || after.size() == 0) return changed;
         for (int i = 0; i < before.size(); ++i) {
             if (!(before.get(i).equals(after.get(i)))) {
                 changed.add(after.get(i));
             }
         }
         return changed;
-    }
-
-    public JsonArray initStatus() {
-        JsonArray statuses = new JsonArray();
-        for (JsonElement service : services) {
-            JsonObject o = new JsonObject();
-            o.addProperty(service.getAsString(), "green");
-            statuses.add(o);
-        }
-        return statuses;
     }
 
     public JsonArray fakeStatus() {

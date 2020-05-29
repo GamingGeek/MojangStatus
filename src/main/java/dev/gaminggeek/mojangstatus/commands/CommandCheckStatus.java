@@ -17,7 +17,7 @@ public class CommandCheckStatus extends ModCoreCommand {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        MojangStatus.check.checkStatus(MojangStatus.lastStatus);
+        MojangStatus.check.checkStatus(MojangStatus.lastStatus, true);
     }
 
     @Override
