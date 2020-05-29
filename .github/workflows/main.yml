@@ -28,9 +28,7 @@ jobs:
         java-version:  1.8
         
     - name: Build Mod
-      uses: eskatos/gradle-command-action@v1
-      with:
-        arguments: build
+      run: sudo chmod 755 ./gradlew && ./gradlew build
  
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2
