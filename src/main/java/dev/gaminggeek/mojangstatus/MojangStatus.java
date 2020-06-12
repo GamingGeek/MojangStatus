@@ -1,6 +1,7 @@
 package dev.gaminggeek.mojangstatus;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import dev.gaminggeek.mojangstatus.commands.CommandCheckStatus;
 import dev.gaminggeek.mojangstatus.commands.CommandMojangStatus;
 import dev.gaminggeek.mojangstatus.modcore.ModCoreInstaller;
@@ -17,15 +18,15 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Mod(modid = MojangStatus.MODID, version = MojangStatus.VERSION)
+@Mod(name = "Mojang Status", modid = MojangStatus.MODID, version = MojangStatus.VERSION)
 public class MojangStatus {
     public static final String MODID = "mojang_status";
-    public static final String VERSION = "1.2";
+    public static final String VERSION = "1.5";
     public static StatusCheck check = new StatusCheck();
     public static StatusConfig statusConfig;
 
     // Stores the last retrieved status for checking if the status has changed
-    public static JsonArray lastStatus;
+    public static JsonObject lastStatus = new JsonObject();
 
 
     @EventHandler
@@ -39,8 +40,7 @@ public class MojangStatus {
         ClientCommandHandler.instance.registerCommand(new CommandMojangStatus());
         ClientCommandHandler.instance.registerCommand(new CommandCheckStatus());
 
-        lastStatus = check.fakeStatus();
-        check.checkStatus(lastStatus, false);
+        check.checkStatus(lastStatus, true);
     }
 
     @EventHandler

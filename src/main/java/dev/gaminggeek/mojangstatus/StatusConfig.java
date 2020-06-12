@@ -56,11 +56,20 @@ public class StatusConfig extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Debug",
-            description = "Shows notifications for all statuses without checking if it changed",
+            description = "Always shows notifications for all statuses",
             category = "Global",
             subcategory = "Other"
     )
     public boolean debug = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "No Changes",
+            description = "Always show notifications for status for some issues or unavailable",
+            category = "Global",
+            subcategory = "Other"
+    )
+    public boolean noChanges = false;
 
     @Property(
         type = PropertyType.SWITCH,

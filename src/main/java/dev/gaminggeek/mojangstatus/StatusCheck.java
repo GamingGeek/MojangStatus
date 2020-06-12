@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Set;
 
 public class StatusCheck {
     public OkHttpClient client = new OkHttpClient();
@@ -22,7 +23,19 @@ public class StatusCheck {
     public JsonArray services = servicesConfig.getAsJsonArray("services");
     public JsonObject names = servicesConfig.getAsJsonObject("names");
 
-    public JsonArray getStatus() throws Exception {
+    public JsonObject arrayToObject(JsonArray arr) {
+        JsonObject obj = new JsonObject();
+        for (JsonElement element: arr.getAsJsonArray()) {
+            JsonObject e = element.getAsJsonObject();
+            Set<String> key = e.keySet();
+            for (String k: key) {
+                obj.addProperty(k, e.get(k).getAsString());
+            }
+        }
+        return obj;
+    }
+
+    public JsonObject getStatus() throws Exception {
         Request request = new Request.Builder()
                 .url("https://status.mojang.com/check")
                 .build();
@@ -31,9 +44,10 @@ public class StatusCheck {
             assert response.body() != null;
             JsonElement status = new JsonParser()
                     .parse(response.body().string());
+            JsonObject statusObj = new JsonObject();
             if (status.isJsonArray()) {
                 try {
-                    return (JsonArray) status;
+                    return arrayToObject(status.getAsJsonArray());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -42,9 +56,10 @@ public class StatusCheck {
         throw new Exception("Failed to retrieve status");
     }
 
-    public void checkStatus(JsonArray lastStatus, Boolean notify) {
+    public void checkStatus(JsonObject lastStatus, Boolean notify) {
+        if (lastStatus.keySet().size() == 0) lastStatus = fakeStatus();
         StatusConfig config = MojangStatus.statusConfig;
-        JsonArray latestStatus = new JsonArray();
+        JsonObject latestStatus = new JsonObject();
         try {
             latestStatus = getStatus();
         } catch (Exception e) {
@@ -114,23 +129,34 @@ public class StatusCheck {
         }
     }
 
-    public JsonArray getChanged(JsonArray before, JsonArray after) {
+    public JsonArray getChanged(JsonObject before, JsonObject after) {
         JsonArray changed = new JsonArray();
         if (before.size() == 0 || after.size() == 0) return changed;
-        for (int i = 0; i < before.size(); ++i) {
-            if (!(before.get(i).equals(after.get(i)))) {
-                changed.add(after.get(i));
+        StatusConfig config = MojangStatus.statusConfig;
+        JsonObject placebo = new JsonObject();
+        Set<String> keys = before.keySet();
+        for (String k: keys) {
+            if (!(before.get(k).equals(after.get(k)))) {
+                placebo.addProperty(k, after.get(k).getAsString());
+                changed.add(placebo.deepCopy());
+                placebo.remove(k);
+            } else if (config.noChanges) {
+                String status = after.get(k).getAsString();
+                if (status.equals("yellow") || status.equals("red")) {
+                    placebo.addProperty(k, after.get(k).getAsString());
+                    changed.add(placebo.deepCopy());
+                    placebo.remove(k);
+                }
             }
         }
         return changed;
     }
 
-    public JsonArray fakeStatus() {
-        JsonArray statuses = new JsonArray();
+    public JsonObject fakeStatus() {
+        StatusConfig config = MojangStatus.statusConfig;
+        JsonObject statuses = new JsonObject();
         for (JsonElement service : services) {
-            JsonObject o = new JsonObject();
-            o.addProperty(service.getAsString(), "grey");
-            statuses.add(o);
+            statuses.addProperty(service.getAsString(), config.debug ? "grey" : "green");
         }
         return statuses;
     }
