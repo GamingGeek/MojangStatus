@@ -14,22 +14,26 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 public class StatusCheck {
     public OkHttpClient client = new OkHttpClient();
     public static final Notifications notifications = Notifications.INSTANCE;
     public JsonObject servicesConfig = getServicesConfig();
-    public JsonArray services = servicesConfig.getAsJsonArray("services");
+    public Set<String> services = getServicesSet();
     public JsonObject names = servicesConfig.getAsJsonObject("names");
 
-    public JsonObject arrayToObject(JsonArray arr) {
+    public JsonObject getServiceStatus(JsonArray arr) {
         JsonObject obj = new JsonObject();
         for (JsonElement element: arr.getAsJsonArray()) {
             JsonObject e = element.getAsJsonObject();
-            Set<String> key = e.keySet();
-            for (String k: key) {
-                obj.addProperty(k, e.get(k).getAsString());
+            for (String service: services) {
+                if (e.has(service)) {
+                    obj.addProperty(service, e.get(service).getAsString());
+                }
             }
         }
         return obj;
@@ -44,10 +48,9 @@ public class StatusCheck {
             assert response.body() != null;
             JsonElement status = new JsonParser()
                     .parse(response.body().string());
-            JsonObject statusObj = new JsonObject();
             if (status.isJsonArray()) {
                 try {
-                    return arrayToObject(status.getAsJsonArray());
+                    return getServiceStatus(status.getAsJsonArray());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -57,13 +60,14 @@ public class StatusCheck {
     }
 
     public void checkStatus(JsonObject lastStatus, Boolean notify) {
-        if (lastStatus.keySet().size() == 0) lastStatus = fakeStatus();
+        if (getSize(lastStatus) == 0) lastStatus = fakeStatus();
         StatusConfig config = MojangStatus.statusConfig;
-        JsonObject latestStatus = new JsonObject();
+        JsonObject latestStatus;
         try {
             latestStatus = getStatus();
         } catch (Exception e) {
             e.printStackTrace();
+            return;
         }
         if (notify) {
             if (config.debug) lastStatus = fakeStatus();
@@ -131,21 +135,19 @@ public class StatusCheck {
 
     public JsonArray getChanged(JsonObject before, JsonObject after) {
         JsonArray changed = new JsonArray();
-        if (before.size() == 0 || after.size() == 0) return changed;
+        if (getSize(before) == 0 || getSize(after) == 0) return changed;
         StatusConfig config = MojangStatus.statusConfig;
-        JsonObject placebo = new JsonObject();
-        Set<String> keys = before.keySet();
-        for (String k: keys) {
+        for (String k: services) {
             if (!(before.get(k).equals(after.get(k)))) {
+                JsonObject placebo = new JsonObject();
                 placebo.addProperty(k, after.get(k).getAsString());
-                changed.add(placebo.deepCopy());
-                placebo.remove(k);
+                changed.add(placebo);
             } else if (config.noChanges) {
                 String status = after.get(k).getAsString();
                 if (status.equals("yellow") || status.equals("red")) {
+                    JsonObject placebo = new JsonObject();
                     placebo.addProperty(k, after.get(k).getAsString());
-                    changed.add(placebo.deepCopy());
-                    placebo.remove(k);
+                    changed.add(placebo);
                 }
             }
         }
@@ -155,10 +157,18 @@ public class StatusCheck {
     public JsonObject fakeStatus() {
         StatusConfig config = MojangStatus.statusConfig;
         JsonObject statuses = new JsonObject();
-        for (JsonElement service : services) {
-            statuses.addProperty(service.getAsString(), config.debug ? "grey" : "green");
+        for (String service : services) {
+            statuses.addProperty(service, config.debug ? "grey" : "green");
         }
         return statuses;
+    }
+
+    public Integer getSize(JsonObject obj) {
+        Integer size = 0;
+        for (Map.Entry<String, JsonElement> e: obj.entrySet()) {
+            size++;
+        }
+        return size;
     }
 
     public JsonObject getServicesConfig() {
@@ -177,5 +187,14 @@ public class StatusCheck {
         }
         final String data = sb.toString();
         return new JsonHolder(data).getObject();
+    }
+
+    public Set<String> getServicesSet() {
+        JsonArray services = servicesConfig.getAsJsonArray("services");
+        Set<String> keys = new HashSet<>();
+        for (JsonElement s: services) {
+            keys.add(s.getAsString());
+        }
+        return keys;
     }
 }

@@ -14,7 +14,7 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.5"
+version = "1.5.2"
 group = "dev.gaminggeek.mojangstatus" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "MojangStatus"
 
@@ -40,6 +40,7 @@ repositories {
 dependencies {
     provided files("libs/modcore.jar")
     implementation "com.squareup.okhttp3:okhttp:4.5.0"
+    implementation "com.google.code.gson:gson:2.2.4"
 }
 
 processResources {

@@ -21,7 +21,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod(name = "Mojang Status", modid = MojangStatus.MODID, version = MojangStatus.VERSION)
 public class MojangStatus {
     public static final String MODID = "mojang_status";
-    public static final String VERSION = "1.5";
+    public static final String VERSION = "1.5.2";
     public static StatusCheck check = new StatusCheck();
     public static StatusConfig statusConfig;
 
