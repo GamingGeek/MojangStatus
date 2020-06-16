@@ -27,9 +27,9 @@ public class StatusCheck {
 
     public JsonObject getServiceStatus(JsonArray arr) {
         JsonObject obj = new JsonObject();
-        for (JsonElement element: arr.getAsJsonArray()) {
+        for (JsonElement element : arr.getAsJsonArray()) {
             JsonObject e = element.getAsJsonObject();
-            for (String service: services) {
+            for (String service : services) {
                 if (e.has(service)) {
                     obj.addProperty(service, e.get(service).getAsString());
                 }
@@ -45,11 +45,13 @@ public class StatusCheck {
 
         final JsonElement[] status = new JsonElement[1];
         client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(@NotNull Call call, @NotNull IOException e) {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 e.printStackTrace();
             }
 
-            @Override public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
@@ -149,7 +151,7 @@ public class StatusCheck {
         JsonArray changed = new JsonArray();
         if (getSize(before) == 0 || getSize(after) == 0) return changed;
         StatusConfig config = MojangStatus.statusConfig;
-        for (String k: services) {
+        for (String k : services) {
             if (!(before.get(k).equals(after.get(k)))) {
                 JsonObject placebo = new JsonObject();
                 placebo.addProperty(k, after.get(k).getAsString());
@@ -177,7 +179,7 @@ public class StatusCheck {
 
     public Integer getSize(JsonObject obj) {
         Integer size = 0;
-        for (Map.Entry<String, JsonElement> e: obj.entrySet()) {
+        for (Map.Entry<String, JsonElement> e : obj.entrySet()) {
             size++;
         }
         return size;
@@ -204,7 +206,7 @@ public class StatusCheck {
     public Set<String> getServicesSet() {
         JsonArray services = servicesConfig.getAsJsonArray("services");
         Set<String> keys = new HashSet<>();
-        for (JsonElement s: services) {
+        for (JsonElement s : services) {
             keys.add(s.getAsString());
         }
         return keys;
