@@ -6,9 +6,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,16 +43,29 @@ public class StatusCheck {
                 .url("https://status.mojang.com/check")
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            assert response.body() != null;
-            JsonElement status = new JsonParser()
-                    .parse(response.body().string());
-            if (status.isJsonArray()) {
-                try {
-                    return getServiceStatus(status.getAsJsonArray());
+        final JsonElement[] status = new JsonElement[1];
+        client.newCall(request).enqueue(new Callback() {
+            @Override public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                    assert responseBody != null;
+                    status[0] = new JsonParser()
+                            .parse(responseBody.string());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+        });
+        if (status[0].isJsonArray()) {
+            try {
+                return getServiceStatus(status[0].getAsJsonArray());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         throw new Exception("Failed to retrieve status");
