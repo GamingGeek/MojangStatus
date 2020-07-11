@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 public class StatusCheck {
     public OkHttpClient client = new OkHttpClient();
@@ -44,33 +45,38 @@ public class StatusCheck {
                 .build();
 
         final JsonElement[] status = new JsonElement[1];
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 e.printStackTrace();
+                countDownLatch.countDown();
             }
 
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try (ResponseBody responseBody = response.body()) {
                     if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                     assert responseBody != null;
-                    status[0] = new JsonParser()
-                            .parse(responseBody.string());
+                    status[0] = new JsonParser().parse(responseBody.string());
+                    countDownLatch.countDown();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-        if (status[0].isJsonArray()) {
+        countDownLatch.await();  // Ensure request has finished
+        if (status[0] != null && status[0].isJsonArray()) {
             try {
                 return getServiceStatus(status[0].getAsJsonArray());
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else {
+            System.out.println("Failed to retrieve status");
         }
-        throw new Exception("Failed to retrieve status");
+        return new JsonObject();
     }
 
     public void checkStatus(JsonObject lastStatus, Boolean notify) {
@@ -79,6 +85,7 @@ public class StatusCheck {
         JsonObject latestStatus;
         try {
             latestStatus = getStatus();
+            System.out.println("LATEST STATUS == " + latestStatus.toString());
         } catch (Exception e) {
             e.printStackTrace();
             return;
