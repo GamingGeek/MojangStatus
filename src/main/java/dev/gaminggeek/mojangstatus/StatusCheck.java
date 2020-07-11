@@ -85,7 +85,6 @@ public class StatusCheck {
         JsonObject latestStatus;
         try {
             latestStatus = getStatus();
-            System.out.println("LATEST STATUS == " + latestStatus.toString());
         } catch (Exception e) {
             e.printStackTrace();
             return;
