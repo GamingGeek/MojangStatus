@@ -1,27 +1,17 @@
 package dev.gaminggeek.mojangstatus.commands;
 
-import club.sk1er.mods.core.command.ModCoreCommand;
 import dev.gaminggeek.mojangstatus.MojangStatus;
-import net.minecraft.command.ICommandSender;
+import net.modcore.api.commands.DefaultHandler;
+import net.modcore.api.commands.Command;
+import org.jetbrains.annotations.NotNull;
 
-public class CommandCheckStatus extends ModCoreCommand {
-    @Override
-    public String getCommandName() {
-        return "checkstatus";
+public class CommandCheckStatus extends Command {
+    public CommandCheckStatus(@NotNull String name) {
+        super(name);
     }
 
-    @Override
-    public String getCommandUsage(ICommandSender sender) {
-        return "/" + getCommandName();
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args) {
+    @DefaultHandler
+    public void handle() {
         MojangStatus.check.checkStatus(MojangStatus.lastStatus, true);
-    }
-
-    @Override
-    public int getRequiredPermissionLevel() {
-        return -1;
     }
 }

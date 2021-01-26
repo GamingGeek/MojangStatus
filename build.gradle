@@ -5,6 +5,14 @@ buildscript {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
+        maven { url 'https://jitpack.io' }
+        maven {
+            url = "https://repo.sk1er.club/repository/maven-public"
+        }
+        maven {
+            name = 'sponge'
+            url = 'https://repo.spongepowered.org/maven'
+        }
         flatDir dirs: 'libs'
 
     }
@@ -14,7 +22,7 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.7.1"
+version = "1.8"
 group = "dev.gaminggeek.mojangstatus" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "MojangStatus"
 
@@ -35,10 +43,21 @@ minecraft {
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven { url "https://repo.sk1er.club/repository/maven-public" }
+    maven {
+        name = 'sponge'
+        url = 'https://repo.spongepowered.org/maven'
+    }
+}
+
+configurations {
+    embed
 }
 
 dependencies {
-    provided files("libs/modcore.jar")
+    embed "net.modcore:Loader:2.0.0"
+    implementation "net.modcore:ModCore:712-10809-SNAPSHOT"
     implementation "com.squareup.okhttp3:okhttp:4.5.0"
     implementation "com.google.code.gson:gson:2.2.4"
 }
@@ -64,7 +83,8 @@ processResources {
 
 jar {
     manifest {
-        attributes "FMLCorePlugin": "dev.gaminggeek.mojangstatus.modcore.FMLLoadingPlugin",
+        attributes "TweakClass": "net.modcore.loader.ModCoreSetupTweaker",
+                "TweakOrder": "0",
                 "ModSide": "CLIENT",
                 "FMLCorePluginContainsFMLMod": "Yes, yes it does"
     }
