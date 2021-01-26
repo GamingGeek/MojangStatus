@@ -13,14 +13,15 @@ buildscript {
             name = 'sponge'
             url = 'https://repo.spongepowered.org/maven'
         }
-        flatDir dirs: 'libs'
-
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.4"
     }
 }
+
 apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: "com.github.johnrengelman.shadow"
 
 version = "1.8"
 group = "dev.gaminggeek.mojangstatus" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -31,14 +32,9 @@ sourceCompatibility = targetCompatibility = 1.8
 minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
     runDir = "run"
-
-    // the mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   snapshot are built nightly.
-    // stable_#            stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not allways work.
-    // simply re-run your setup task after changing the mappings to update your workspace.
     mappings = "stable_22"
     makeObfSourceJar = false
+    clientRunArgs += "--tweakClass net.modcore.loader.ModCoreSetupTweaker"
 }
 
 repositories {
@@ -53,14 +49,35 @@ repositories {
 
 configurations {
     embed
+    compile.extendsFrom(embed)
 }
 
 dependencies {
-    embed "net.modcore:Loader:2.0.0"
-    implementation "net.modcore:ModCore:712-10809-SNAPSHOT"
-    implementation "com.squareup.okhttp3:okhttp:4.5.0"
-    implementation "com.google.code.gson:gson:2.2.4"
+    embed("net.modcore:Loader:2.0.0")
+    embed("com.squareup.okhttp3:okhttp:4.5.0")
+
+    implementation("com.google.code.gson:gson:2.2.4")
+    implementation("net.modcore:ModCore:713-10809-SNAPSHOT") {
+        exclude module: 'asm-commons'
+        exclude module: 'asm-tree'
+        exclude module: 'asm'
+    }
 }
+
+shadowJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    configurations = [project.configurations.embed]
+
+    classifier = ''
+
+    manifest.attributes(
+            "TweakClass": "net.modcore.loader.ModCoreSetupTweaker",
+            "TweakOrder": "0"
+    )
+}
+
+reobfJar.dependsOn tasks.shadowJar
 
 processResources {
     // this will ensure that this task is redone when the versions change.
@@ -78,14 +95,5 @@ processResources {
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
-    }
-}
-
-jar {
-    manifest {
-        attributes "TweakClass": "net.modcore.loader.ModCoreSetupTweaker",
-                "TweakOrder": "0",
-                "ModSide": "CLIENT",
-                "FMLCorePluginContainsFMLMod": "Yes, yes it does"
     }
 }
