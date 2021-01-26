@@ -7,13 +7,15 @@ import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.WorldEvent.Load;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.modcore.api.ModCoreAPI;
+
+import static org.koin.core.context.ContextFunctionsKt.startKoin;
 
 @Mod(name = "Mojang Status", modid = MojangStatus.MODID, version = MojangStatus.VERSION)
 public class MojangStatus {
@@ -25,14 +27,13 @@ public class MojangStatus {
     // Stores the last retrieved status for checking if the status has changed
     public static JsonObject lastStatus = new JsonObject();
 
-
     @EventHandler
-    public void init(FMLInitializationEvent event) {
+    public void init(FMLPostInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(this);
 
         statusConfig = new StatusConfig();
         statusConfig.preload();
 
-        MinecraftForge.EVENT_BUS.register(this);
         ModCoreAPI.getCommandRegistry().registerCommand(new CommandMojangStatus("mojangstatus"));
         ModCoreAPI.getCommandRegistry().registerCommand(new CommandCheckStatus("checkstatus"));
 
@@ -47,7 +48,7 @@ public class MojangStatus {
     }
 
     @SubscribeEvent
-    public void onWorldLoad(Load event) {
+    public void onWorldLoad(WorldEvent.Load event) {
         if (statusConfig.statusMessages && statusConfig.statusOnWorldLoad) {
             check.checkStatus(lastStatus, true);
         }

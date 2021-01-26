@@ -1,11 +1,12 @@
 package dev.gaminggeek.mojangstatus;
 
-import club.sk1er.mods.core.gui.notification.Notifications;
-import club.sk1er.mods.core.util.JsonHolder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.modcore.api.ModCoreAPI;
+import net.modcore.api.gui.Notifications;
+import net.modcore.api.utils.JsonHolder;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,14 +15,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 public class StatusCheck {
     public OkHttpClient client = new OkHttpClient();
-    public static final Notifications notifications = Notifications.INSTANCE;
+    public Notifications notifications;
     public JsonObject servicesConfig = getServicesConfig();
     public Set<String> services = getServicesSet();
     public JsonObject names = servicesConfig.getAsJsonObject("names");
@@ -132,21 +132,22 @@ public class StatusCheck {
     }
 
     public void notify(String service, String status) {
+        notifications = ModCoreAPI.getInstance().notifications();
         service = names.get(service).getAsString();
         String i = "is";
         if (service.endsWith("s")) i = "are";
         if (status.equalsIgnoreCase("green")) {
-            notifications.pushNotification(
+            notifications.push(
                     "Status Change",
                     String.format("%s " + i + " online!", service)
             );
         } else if (status.equalsIgnoreCase("yellow")) {
-            notifications.pushNotification(
+            notifications.push(
                     "Status Change",
                     String.format("%s " + i + " having some issues!", service)
             );
         } else if (status.equalsIgnoreCase("red")) {
-            notifications.pushNotification(
+            notifications.push(
                     "Status Change",
                     String.format("%s " + i + " unavailable!", service)
             );
