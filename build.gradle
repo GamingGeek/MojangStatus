@@ -62,12 +62,11 @@ shadowJar {
 
 reobfJar.dependsOn tasks.shadowJar
 
-//processResources {
-//    inputs.property "version", project.version
-//    inputs.property "mcversion", project.minecraft.version
-//
-//    filesMatching("mcmod.info") {
-//        expand "version": project.version
-//        expand "mcversion": project.minecraft.version
-//    }
-//}
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'mcversion', project.minecraft.version
+
+    filesMatching('mcmod.info') {
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+}
