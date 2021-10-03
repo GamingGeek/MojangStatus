@@ -1,8 +1,8 @@
 package dev.gaminggeek.mojangstatus;
 
-import club.sk1er.vigilance.Vigilant;
-import club.sk1er.vigilance.data.Property;
-import club.sk1er.vigilance.data.PropertyType;
+import gg.essential.vigilance.Vigilant;
+import gg.essential.vigilance.data.Property;
+import gg.essential.vigilance.data.PropertyType;
 
 import java.io.File;
 
@@ -60,7 +60,7 @@ public class StatusConfig extends Vigilant {
             category = "Global",
             subcategory = "Other"
     )
-    public boolean debug = false;
+    public boolean debug = true;
 
     @Property(
             type = PropertyType.SWITCH,

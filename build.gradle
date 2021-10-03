@@ -13,20 +13,23 @@ minecraft {
     runDir = "run"
     mappings = "stable_22"
     makeObfSourceJar = false
-    clientRunArgs += "--tweakClass net.modcore.loader.ModCoreSetupTweaker"
+    clientRunArgs += "--tweakClass gg.essential.loader.stage0.EssentialSetupTweaker"
 }
 
 repositories {
     mavenCentral()
+
     maven {
+        name "Jitpack"
         url "https://jitpack.io"
     }
     maven {
+        name "Sk1er Repository"
         url "https://repo.sk1er.club/repository/maven-public"
     }
     maven {
-        name = "sponge"
-        url = "https://repo.spongepowered.org/maven"
+        name = "Sponge Repository"
+        url = "https://repo.spongepowered.org/repository/maven-public/"
     }
 }
 
@@ -36,11 +39,10 @@ configurations {
 }
 
 dependencies {
-    include("net.modcore:Loader:2.0.0")
-    include("com.squareup.okhttp3:okhttp:4.5.0")
+    include "gg.essential:loader-launchwrapper:1.1.1"
+    include "com.squareup.okhttp3:okhttp:4.5.0"
 
-    implementation("com.google.code.gson:gson:2.2.4")
-    implementation("net.modcore:ModCore:713-10809-SNAPSHOT") {
+    implementation("gg.essential:essential-1.8.9-forge:1492") {
         exclude module: "asm-commons"
         exclude module: "asm-tree"
         exclude module: "asm"
@@ -53,19 +55,19 @@ shadowJar {
     archiveClassifier.set("")
 
     manifest.attributes(
-        "TweakClass": "net.modcore.loader.ModCoreSetupTweaker",
+        "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker",
         "TweakOrder": "0"
     )
 }
 
 reobfJar.dependsOn tasks.shadowJar
 
-processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    filesMatching("mcmod.info") {
-        expand "version": project.version
-        expand "mcversion": project.minecraft.version
-    }
-}
+//processResources {
+//    inputs.property "version", project.version
+//    inputs.property "mcversion", project.minecraft.version
+//
+//    filesMatching("mcmod.info") {
+//        expand "version": project.version
+//        expand "mcversion": project.minecraft.version
+//    }
+//}

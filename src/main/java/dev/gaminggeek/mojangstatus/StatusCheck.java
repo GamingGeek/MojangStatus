@@ -4,13 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.modcore.api.ModCoreAPI;
-import net.modcore.api.gui.Notifications;
-import net.modcore.api.utils.JsonHolder;
+import gg.essential.api.EssentialAPI;
+import gg.essential.api.gui.Notifications;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,15 +18,16 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 public class StatusCheck {
-    public OkHttpClient client = new OkHttpClient();
-    public Notifications notifications;
-    public JsonObject servicesConfig = getServicesConfig();
-    public Set<String> services = getServicesSet();
-    public JsonObject names = servicesConfig.getAsJsonObject("names");
+    private final JsonParser parser = new JsonParser();
 
-    public JsonObject getServiceStatus(JsonArray arr) {
+    private final OkHttpClient client = new OkHttpClient();
+    private final JsonObject servicesConfig = getServicesConfig();
+    private final Set<String> services = getServicesSet();
+    private final JsonObject names = servicesConfig.getAsJsonObject("names");
+
+    public JsonObject getServiceStatus(JsonArray serviceArray) {
         JsonObject obj = new JsonObject();
-        for (JsonElement element : arr.getAsJsonArray()) {
+        for (JsonElement element : serviceArray.getAsJsonArray()) {
             JsonObject e = element.getAsJsonObject();
             for (String service : services) {
                 if (e.has(service)) {
@@ -41,8 +40,8 @@ public class StatusCheck {
 
     public JsonObject getStatus() throws Exception {
         Request request = new Request.Builder()
-                .url("https://status.mojang.com/check")
-                .build();
+            .url("https://status.mojang.com/check")
+            .build();
 
         final JsonElement[] status = new JsonElement[1];
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -81,7 +80,7 @@ public class StatusCheck {
 
     public void checkStatus(JsonObject lastStatus, Boolean notify) {
         if (getSize(lastStatus) == 0) lastStatus = fakeStatus();
-        StatusConfig config = MojangStatus.statusConfig;
+        StatusConfig config = MojangStatus.getStatusConfig();
         JsonObject latestStatus;
         try {
             latestStatus = getStatus();
@@ -132,24 +131,24 @@ public class StatusCheck {
     }
 
     public void notify(String service, String status) {
-        notifications = ModCoreAPI.getInstance().notifications();
+        Notifications notifications = EssentialAPI.getNotifications();
         service = names.get(service).getAsString();
         String i = "is";
         if (service.endsWith("s")) i = "are";
         if (status.equalsIgnoreCase("green")) {
             notifications.push(
-                    "Status Change",
-                    String.format("%s " + i + " online!", service)
+                "Status Change",
+                String.format("%s " + i + " online!", service)
             );
         } else if (status.equalsIgnoreCase("yellow")) {
             notifications.push(
-                    "Status Change",
-                    String.format("%s " + i + " having some issues!", service)
+                "Status Change",
+                String.format("%s " + i + " having some issues!", service)
             );
         } else if (status.equalsIgnoreCase("red")) {
             notifications.push(
-                    "Status Change",
-                    String.format("%s " + i + " unavailable!", service)
+                "Status Change",
+                String.format("%s " + i + " unavailable!", service)
             );
         }
     }
@@ -157,7 +156,7 @@ public class StatusCheck {
     public JsonArray getChanged(JsonObject before, JsonObject after) {
         JsonArray changed = new JsonArray();
         if (getSize(before) == 0 || getSize(after) == 0) return changed;
-        StatusConfig config = MojangStatus.statusConfig;
+        StatusConfig config = MojangStatus.getStatusConfig();
         for (String k : services) {
             if (!(before.get(k).equals(after.get(k)))) {
                 JsonObject placebo = new JsonObject();
@@ -176,7 +175,7 @@ public class StatusCheck {
     }
 
     public JsonObject fakeStatus() {
-        StatusConfig config = MojangStatus.statusConfig;
+        StatusConfig config = MojangStatus.getStatusConfig();
         JsonObject statuses = new JsonObject();
         for (String service : services) {
             statuses.addProperty(service, config.debug ? "grey" : "green");
@@ -185,33 +184,24 @@ public class StatusCheck {
     }
 
     public Integer getSize(JsonObject obj) {
-        Integer size = 0;
-        for (Map.Entry<String, JsonElement> e : obj.entrySet()) {
-            size++;
-        }
-        return size;
+        return obj.entrySet().size();
     }
 
     public JsonObject getServicesConfig() {
-        final InputStream inputStream = StatusCheck.class.getResourceAsStream("/services.json");
-        final StringBuilder sb = new StringBuilder();
-        try {
-            final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line).append("\n");
+        try (InputStream stream = StatusCheck.class.getResourceAsStream("/services.json")) {
+            if (stream != null) {
+                try (InputStreamReader reader = new InputStreamReader(stream)) {
+                    return parser.parse(reader).getAsJsonObject();
+                }
             }
-            inputStream.close();
-            br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        final String data = sb.toString();
-        return new JsonHolder(data).getObject();
+        return new JsonObject();
     }
 
     public Set<String> getServicesSet() {
-        JsonArray services = servicesConfig.getAsJsonArray("services");
+        JsonArray services = getServicesConfig().getAsJsonArray("services");
         Set<String> keys = new HashSet<>();
         for (JsonElement s : services) {
             keys.add(s.getAsString());

@@ -1,16 +1,18 @@
 [
-{
-  "modid": "mojang_status",
-  "name": "Mojang Status",
-  "description": "A simple yet customizable mod to show Mojang's status",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "https://github.com/GamingGeek/MojangStatus",
-  "updateUrl": "",
-  "authorList": ["Geek"],
-  "credits": "Sk1er LLC for making Modcore, Elementa and Vigilance.",
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
-}
+  {
+    "modid": "mojang_status",
+    "name": "MojangStatus",
+    "description": "A simple yet customizable mod to show Mojang's status",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/GamingGeek/MojangStatus",
+    "updateUrl": "",
+    "authorList": [
+      "Geek"
+    ],
+    "credits": "ModCore Inc. for making Essential, Elementa and Vigilance.",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
 ]
