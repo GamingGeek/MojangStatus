@@ -60,7 +60,7 @@ public class StatusConfig extends Vigilant {
             category = "Global",
             subcategory = "Other"
     )
-    public boolean debug = true;
+    public boolean debug = false;
 
     @Property(
             type = PropertyType.SWITCH,
