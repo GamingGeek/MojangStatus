@@ -55,7 +55,10 @@ public class StatusCheck {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try (ResponseBody responseBody = response.body()) {
-                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+                    if (!response.isSuccessful()) {
+                        countDownLatch.countDown();
+                        throw new IOException("Unexpected code " + response);
+                    }
 
                     assert responseBody != null;
                     status[0] = new JsonParser().parse(responseBody.string());
